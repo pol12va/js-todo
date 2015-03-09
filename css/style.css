@@ -1,0 +1,24 @@
+body {
+    background: #f5f5f5;
+    font-family: Georgia, Helvetica, Arial, sans-serif;
+}
+
+.content {
+    text-align: center;
+    position: relative;
+    width: 960px;
+    margin: auto;
+}
+
+.header {
+    font-size: 5em;
+    color: rgba(175, 47, 47, 0.15);
+}
+
+.new-note {
+    margin-top: 20px;
+    border: none;
+    padding: 16px 16px 16px 60px;
+    font-size: 1.8em; 
+    width: 480px;   
+}
