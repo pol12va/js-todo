@@ -22,3 +22,8 @@ body {
     font-size: 1.8em; 
     width: 480px;   
 }
+
+.toggle-all {
+    position: relative;
+    right: 540px;
+}

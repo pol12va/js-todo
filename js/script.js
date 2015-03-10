@@ -7,6 +7,14 @@ var TODO_APP = {
 }());
 
 function Todo() {
+    var self = this;
+
     this.inputText = document.querySelector(".new-note");
     this.inputText.style.fontStyle = TODO_APP.newTaskTextStyle;
+
+    this.inputText.addEventListener("keydown", function(e) {
+        if (e.keyCode === 13) {
+            
+        }
+    });
 }
