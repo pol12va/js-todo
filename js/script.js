@@ -23,6 +23,22 @@ Todo.prototype.addTask = function(taskText) {
     tasks.forEach(function(cur) {
         console.log(cur.text + " " + cur.isCompleted);
     });
+    (function(text) {
+        var newTaskFragment = document.createDocumentFragment(),
+            newTaskCheckBox = document.createElement("input"),
+            newTaskRow = document.createElement("div"),
+            newTaskText = document.createElement("label"),
+            taskList = document.querySelector(".task-list");
+
+        newTaskCheckBox.type = "checkbox";
+        newTaskCheckBox.className = "toggle-task";
+        taskList.lastChild ? newTaskText.className = "task" : newTaskText.className = "last-task";
+        newTaskText.textContent = text;
+        newTaskRow.appendChild(newTaskText);
+        newTaskRow.appendChild(newTaskCheckBox);
+        newTaskFragment.appendChild(newTaskRow);
+        taskList.insertBefore(newTaskFragment, taskList.firstChild);
+    }(taskText));
 };
 
 function Task(text, isCompleted) {
