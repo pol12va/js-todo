@@ -35,6 +35,13 @@ Todo.prototype = (function() {
 
             checkbox.type = "checkbox";
             checkbox.className = "toggle-task";
+            checkbox.addEventListener("click", function(event) {
+                if (checkbox.checked) {
+                    checkbox.previousSibling.style.textDecoration = "line-through";
+                } else {
+                    checkbox.previousSibling.style.textDecoration = "";
+                }
+            });
             taskList.lastChild ? label.className = "task" : label.className = "last-task";
             label.textContent = task.text;
             taskRow.appendChild(label);
