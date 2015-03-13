@@ -47,9 +47,11 @@ body {
 .toggle-task {
     position: relative;
     right: 540px;
+    top: -30%;
 }
 
 .task, .last-task {
+    word-break: break-word;
     margin-left: -5px;
     background: #ffffff;
     text-align: left;
@@ -57,11 +59,11 @@ body {
     display: inline-block;
     width: 480px;
     font-size: 1.8em;
-    border-top: 1px solid #cccccc;
-    border-left: 1px solid #cccccc;
-    border-right: 1px solid #cccccc;
+    border-top: 1px solid #e4e4e4;
+    border-left: 1px solid #e4e4e4;
+    border-right: 1px solid #e4e4e4;
 }
 
 .last-task { 
-    border-bottom: 1px solid #cccccc;
+    border-bottom: 1px solid #e4e4e4;
 }
