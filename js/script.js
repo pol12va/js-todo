@@ -78,7 +78,12 @@ Todo.prototype.addTask = function(task) {
     deleteBtn.addEventListener("click", function(e) {
         var parent = checkbox.parentElement,
             taskDivs = parent.parentElement.childNodes,
+            length = taskDivs.length,
             index = [].slice.call(taskDivs).indexOf(parent);
+
+        if (index === 0 && length > 0) {
+            taskDivs[1].childNodes[0].className = "first-task";
+        }
         self.tasks.splice(index, 1);
         parent.parentElement.removeChild(parent);
     });
