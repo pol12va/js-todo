@@ -12,6 +12,7 @@ function Todo() {
         this.tasks.forEach(function(cur) {
             self.addTask(cur);
         });
+        this.tasks.reverse();
     }
 
     inputText.addEventListener("keydown", function(e) {
@@ -19,42 +20,53 @@ function Todo() {
             var task = new Task(this.value, false);
             
             self.addTask(task);
-            self.tasks.push(task);
+            self.tasks.unshift(task);
             this.value = "";               
         }
     });
 }
 
-Todo.prototype = (function() {
-    return {
-        addTask: function(task) {
-            var checkbox = document.createElement("input"),
-                taskRow = document.createElement("div"),
-                label = document.createElement("label"),
-                taskList = document.querySelector(".task-list");
+Todo.prototype.addTask = function(task) {
+    var checkbox = document.createElement("input"),
+        taskRow = document.createElement("div"),
+        label = document.createElement("label"),
+        taskList = document.querySelector(".task-list"),
+        self = this;
 
-            checkbox.type = "checkbox";
-            checkbox.className = "toggle-task";
-            checkbox.addEventListener("click", function(event) {
-                if (checkbox.checked) {
-                    checkbox.previousSibling.style.textDecoration = "line-through";
-                } else {
-                    checkbox.previousSibling.style.textDecoration = "";
-                }
-            });
-            taskList.lastChild ? label.className = "task" : label.className = "last-task";
-            label.textContent = task.text;
-            taskRow.appendChild(label);
-            taskRow.appendChild(checkbox);
-            taskList.insertBefore(taskRow, taskList.firstChild);
-        },
-        loadTasks: function() {
-            this.tasks.forEach(function(cur) {
-                this.addTask(cur);
-            }.bind(this));    
+    checkbox.type = "checkbox";
+    checkbox.className = "toggle-task";
+    checkbox.addEventListener("click", function(event) {
+        var parent = checkbox.previousSibling.parentElement,
+            taskDivs = parent.parentElement.childNodes,
+            index = [].slice.call(taskDivs).indexOf(parent);
+
+        if (checkbox.checked) {
+            checkbox.previousSibling.style.textDecoration = "line-through";
+            self.tasks[index].isCompleted = true;
+        } else {
+            checkbox.previousSibling.style.textDecoration = "";
+            self.tasks[index].isCompleted = false;
         }
-    };    
-}());
+    });
+    taskList.lastChild ? label.className = "task" : label.className = "last-task";
+    label.textContent = task.text;
+    if (task.isCompleted) {        
+        label.style.textDecoration = "line-through";
+        checkbox.checked = true;
+    } else {
+        label.style.textDecoration = "";
+        checkbox.checked = false;
+    }
+    taskRow.appendChild(label);
+    taskRow.appendChild(checkbox);
+    taskList.insertBefore(taskRow, taskList.firstChild);  
+};
+
+Todo.prototype.loadTasks = function() {  
+    this.tasks.forEach(function(cur) {
+        this.addTask(cur);
+    }.bind(this));  
+};
 
 function Task(text, isCompleted) {
     if (!(this instanceof Task)) {
@@ -65,8 +77,9 @@ function Task(text, isCompleted) {
 }
 
 (function() {
+    //localStorage.removeItem("tasks");
     var todo = new Todo();
     window.addEventListener("beforeunload", function() {
-        localStorage.setItem("tasks", JSON.stringify(todo.tasks));
+        localStorage.setItem("tasks", JSON.stringify(todo.tasks.reverse()));
     });
 }());
