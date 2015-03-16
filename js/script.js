@@ -12,7 +12,6 @@ function Todo() {
         this.tasks.forEach(function(cur) {
             self.addTask(cur);
         });
-        this.tasks.reverse();
     }
 
     inputText.addEventListener("keydown", function(e) {
@@ -20,7 +19,7 @@ function Todo() {
             var task = new Task(this.value, false);
             
             self.addTask(task);
-            self.tasks.unshift(task);
+            self.tasks.push(task);
             this.value = "";               
         }
     });
@@ -30,13 +29,14 @@ Todo.prototype.addTask = function(task) {
     var checkbox = document.createElement("input"),
         taskRow = document.createElement("div"),
         label = document.createElement("label"),
+        deleteBtn = document.createElement("button"),
         taskList = document.querySelector(".task-list"),
         self = this;
 
     checkbox.type = "checkbox";
     checkbox.className = "toggle-task";
     checkbox.addEventListener("click", function(event) {
-        var parent = checkbox.previousSibling.parentElement,
+        var parent = checkbox.parentElement,
             taskDivs = parent.parentElement.childNodes,
             index = [].slice.call(taskDivs).indexOf(parent);
 
@@ -48,6 +48,7 @@ Todo.prototype.addTask = function(task) {
             self.tasks[index].isCompleted = false;
         }
     });
+
     taskList.lastChild ? label.className = "task" : label.className = "last-task";
     label.textContent = task.text;
     if (task.isCompleted) {        
@@ -57,9 +58,28 @@ Todo.prototype.addTask = function(task) {
         label.style.textDecoration = "";
         checkbox.checked = false;
     }
+
+    deleteBtn.className = "delete";
+    deleteBtn.textContent = "X";
+    deleteBtn.style.visibility = "hidden";
+    deleteBtn.addEventListener("click", function(event) {
+        var parent = checkbox.parentElement,
+            taskDivs = parent.parentElement.childNodes,
+            index = [].slice.call(taskDivs).indexOf(parent);
+        self.tasks.splice(index, 1);
+        parent.parentElement.removeChild(parent);
+    });
+    
+    taskRow.addEventListener("mouseenter", function(event) {
+        this.lastChild.style.visibility = "visible";
+    });
+    taskRow.addEventListener("mouseleave", function(event) {
+        this.lastChild.style.visibility = "hidden";
+    });
     taskRow.appendChild(label);
     taskRow.appendChild(checkbox);
-    taskList.insertBefore(taskRow, taskList.firstChild);  
+    taskRow.appendChild(deleteBtn);
+    taskList.appendChild(taskRow, taskList.firstChild);  
 };
 
 Todo.prototype.loadTasks = function() {  
@@ -80,6 +100,6 @@ function Task(text, isCompleted) {
     //localStorage.removeItem("tasks");
     var todo = new Todo();
     window.addEventListener("beforeunload", function() {
-        localStorage.setItem("tasks", JSON.stringify(todo.tasks.reverse()));
+        localStorage.setItem("tasks", JSON.stringify(todo.tasks));
     });
 }());
