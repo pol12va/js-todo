@@ -49,7 +49,7 @@ Todo.prototype.addTask = function(task) {
         }
     });
 
-    label.className = "task";
+    taskList.firstChild ? label.className = "task" : label.className = "first-task";
     label.textContent = task.text;
     if (task.isCompleted) {        
         label.style.textDecoration = "line-through";
