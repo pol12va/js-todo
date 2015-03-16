@@ -49,7 +49,7 @@ Todo.prototype.addTask = function(task) {
         }
     });
 
-    taskList.lastChild ? label.className = "task" : label.className = "last-task";
+    label.className = "task";
     label.textContent = task.text;
     if (task.isCompleted) {        
         label.style.textDecoration = "line-through";
@@ -69,7 +69,7 @@ Todo.prototype.addTask = function(task) {
         self.tasks.splice(index, 1);
         parent.parentElement.removeChild(parent);
     });
-    
+
     taskRow.addEventListener("mouseenter", function(event) {
         this.lastChild.style.visibility = "visible";
     });
