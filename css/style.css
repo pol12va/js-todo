@@ -43,7 +43,6 @@ body {
     opacity: 0.5;
     position: relative;
     right: 60px;
-    top: -30%;
     font-size: 1em;
     color: #cc0000;
     background: #ffffff;
@@ -64,7 +63,6 @@ body {
 .toggle-task {
     position: relative;
     right: 540px;
-    top: -30%;
 }
 
 .task, .last-task {
