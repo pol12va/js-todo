@@ -5,7 +5,8 @@ function Todo() {
     var self = this,
         tasksJson = localStorage.getItem("tasks"),
         addTask,
-        inputText = document.querySelector(".new-note");
+        inputText = document.querySelector(".new-note"),
+        toggleAll = document.querySelector(".toggle-all");
 
     this.tasks = (tasksJson !== null && tasksJson !== []) ? JSON.parse(tasksJson) : [];
     if (this.tasks.length !== 0) {
@@ -23,6 +24,16 @@ function Todo() {
             this.value = "";               
         }
     });
+
+    toggleAll.addEventListener("change", function(e) {
+        var i,
+            allCheckboxes = document.getElementsByClassName("toggle-task");
+
+        for (i = 0; i < allCheckboxes.length; i++) {
+            allCheckboxes[i].checked = e.target.checked;
+            allCheckboxes[i].dispatchEvent(new Event('change'));
+        }
+    });
 }
 
 Todo.prototype.addTask = function(task) {
@@ -35,16 +46,18 @@ Todo.prototype.addTask = function(task) {
 
     checkbox.type = "checkbox";
     checkbox.className = "toggle-task";
-    checkbox.addEventListener("click", function(event) {
+    checkbox.addEventListener("change", function(e) {
         var parent = checkbox.parentElement,
             taskDivs = parent.parentElement.childNodes,
             index = [].slice.call(taskDivs).indexOf(parent);
 
         if (checkbox.checked) {
             checkbox.previousSibling.style.textDecoration = "line-through";
+            checkbox.previousSibling.style.opacity = "0.5";
             self.tasks[index].isCompleted = true;
         } else {
             checkbox.previousSibling.style.textDecoration = "";
+            checkbox.previousSibling.style.opacity = "1";
             self.tasks[index].isCompleted = false;
         }
     });
@@ -62,7 +75,7 @@ Todo.prototype.addTask = function(task) {
     deleteBtn.className = "delete";
     deleteBtn.textContent = "X";
     deleteBtn.style.visibility = "hidden";
-    deleteBtn.addEventListener("click", function(event) {
+    deleteBtn.addEventListener("click", function(e) {
         var parent = checkbox.parentElement,
             taskDivs = parent.parentElement.childNodes,
             index = [].slice.call(taskDivs).indexOf(parent);
@@ -70,10 +83,10 @@ Todo.prototype.addTask = function(task) {
         parent.parentElement.removeChild(parent);
     });
 
-    taskRow.addEventListener("mouseenter", function(event) {
+    taskRow.addEventListener("mouseenter", function(e) {
         this.lastChild.style.visibility = "visible";
     });
-    taskRow.addEventListener("mouseleave", function(event) {
+    taskRow.addEventListener("mouseleave", function(e) {
         this.lastChild.style.visibility = "hidden";
     });
     taskRow.appendChild(label);
