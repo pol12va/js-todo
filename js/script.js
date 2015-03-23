@@ -4,15 +4,20 @@ function Todo() {
     }
     var self = this,
         tasksJson = localStorage.getItem("tasks"),
-        addTask,
         inputText = document.querySelector(".new-note"),
         toggleAll = document.querySelector(".toggle-all");
 
     this.tasks = (tasksJson !== null && tasksJson !== []) ? JSON.parse(tasksJson) : [];
+    this.leftTaskCounter = 0;
+
     if (this.tasks.length !== 0) {
         this.tasks.forEach(function(cur) {
             self.addTask(cur);
+            if (!cur.isCompleted) {
+                self.leftTaskCounter++;
+            }
         });
+        self.addFooter();
     }
 
     inputText.addEventListener("keydown", function(e) {
@@ -49,25 +54,32 @@ Todo.prototype.addTask = function(task) {
     checkbox.addEventListener("change", function(e) {
         var parent = checkbox.parentElement,
             taskDivs = parent.parentElement.childNodes,
-            index = [].slice.call(taskDivs).indexOf(parent);
+            index = [].slice.call(taskDivs).indexOf(parent),
+            e = new Event("counter-changed"),
+            spanCounter = document.querySelector(".items-left-counter");
 
         if (checkbox.checked) {
             checkbox.previousSibling.style.textDecoration = "line-through";
-            checkbox.previousSibling.style.opacity = "0.5";
+            checkbox.parentElement.style.opacity = "0.5";
             self.tasks[index].isCompleted = true;
+            self.leftTaskCounter--;
         } else {
             checkbox.previousSibling.style.textDecoration = "";
-            checkbox.previousSibling.style.opacity = "1";
+            checkbox.parentElement.style.opacity = "1";
             self.tasks[index].isCompleted = false;
+            self.leftTaskCounter++;
         }
+        spanCounter.dispatchEvent(e);
     });
 
     taskList.firstChild ? label.className = "task" : label.className = "first-task";
     label.textContent = task.text;
-    if (task.isCompleted) {        
+    if (task.isCompleted) {  
+        taskRow.style.opacity = "0.5";      
         label.style.textDecoration = "line-through";
         checkbox.checked = true;
     } else {
+        taskRow.style.opacity = "1";
         label.style.textDecoration = "";
         checkbox.checked = false;
     }
@@ -94,16 +106,48 @@ Todo.prototype.addTask = function(task) {
     taskRow.addEventListener("mouseleave", function(e) {
         this.lastChild.style.visibility = "hidden";
     });
+
     taskRow.appendChild(label);
     taskRow.appendChild(checkbox);
     taskRow.appendChild(deleteBtn);
-    taskList.appendChild(taskRow, taskList.firstChild);  
+    taskList.appendChild(taskRow, taskList.firstChild);
 };
 
 Todo.prototype.loadTasks = function() {  
     this.tasks.forEach(function(cur) {
         this.addTask(cur);
     }.bind(this));  
+};
+
+Todo.prototype.addFooter = function() {
+    var taskList = document.querySelector(".task-list"),
+        footer = document.createElement("div"),
+        span = document.createElement("span"),
+        self = this;
+
+    span.addEventListener("counter-changed", function() {
+       var itemStr = " items left";
+
+       if (self.leftTaskCounter === 1) {
+           itemStr = " item left";
+       }
+       this.textContent = self.leftTaskCounter + itemStr;
+    }, false);
+    span.className = "items-left-counter";
+    span.textContent = this.leftTaskCounter + " items left";
+    footer.className = "list-footer";
+    footer.appendChild(span);
+    taskList.appendChild(footer);   
+};
+
+Todo.prototype.updateTaskCounter = function() {
+    var span = document.querySelector(".items-left-counter"),
+        itemStr = " items left";
+
+    if (this.leftTaskCounter === 1) {
+        itemStr = " item left";
+    }
+    span.textContent = this.leftTaskCounter + itemStr; 
 };
 
 function Task(text, isCompleted) {
