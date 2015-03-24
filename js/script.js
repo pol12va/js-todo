@@ -5,28 +5,47 @@ function Todo() {
     var self = this,
         tasksJson = localStorage.getItem("tasks"),
         inputText = document.querySelector(".new-note"),
-        toggleAll = document.querySelector(".toggle-all");
+        toggleAll = document.querySelector(".toggle-all"),
+        taskList = document.querySelector(".task-list"),
+        footer = document.querySelector(".list-footer"),
+        span = document.querySelector(".items-left-counter");
 
     this.tasks = (tasksJson !== null && tasksJson !== []) ? JSON.parse(tasksJson) : [];
     this.leftTaskCounter = 0;
 
+    span.addEventListener("counter-changed", function() {
+       var itemStr = " items left";
+
+       if (self.leftTaskCounter === 1) {
+           itemStr = " item left";
+       }
+       this.textContent = self.leftTaskCounter + itemStr;
+    }, false);
+
     if (this.tasks.length !== 0) {
         this.tasks.forEach(function(cur) {
-            self.addTask(cur);
+            self.addTask(cur, taskList);
             if (!cur.isCompleted) {
                 self.leftTaskCounter++;
             }
         });
-        self.addFooter();
+        footer.style.visibility = "visible";
     }
-
+    span.textContent = this.leftTaskCounter + " items left";
+    
     inputText.addEventListener("keydown", function(e) {
         if (e.keyCode === 13) {
-            var task = new Task(this.value, false);
+            var task = new Task(this.value, false),
+                e = new Event("counter-changed");
             
-            self.addTask(task);
+            self.addTask(task, taskList);
+            self.leftTaskCounter++;
+            if (self.tasks.length === 0) {
+                footer.style.visibility = "visible";
+            }
             self.tasks.push(task);
-            this.value = "";               
+            span.dispatchEvent(e);
+            this.value = "";
         }
     });
 
@@ -41,12 +60,11 @@ function Todo() {
     });
 }
 
-Todo.prototype.addTask = function(task) {
+Todo.prototype.addTask = function(task, taskRoot) {
     var checkbox = document.createElement("input"),
         taskRow = document.createElement("div"),
         label = document.createElement("label"),
         deleteBtn = document.createElement("button"),
-        taskList = document.querySelector(".task-list"),
         self = this;
 
     checkbox.type = "checkbox";
@@ -72,10 +90,10 @@ Todo.prototype.addTask = function(task) {
         spanCounter.dispatchEvent(e);
     });
 
-    taskList.firstChild ? label.className = "task" : label.className = "first-task";
+    taskRoot.firstChild ? label.className = "task" : label.className = "first-task";
     label.textContent = task.text;
     if (task.isCompleted) {  
-        taskRow.style.opacity = "0.5";      
+        taskRow.style.opacity = "0.5";
         label.style.textDecoration = "line-through";
         checkbox.checked = true;
     } else {
@@ -89,15 +107,29 @@ Todo.prototype.addTask = function(task) {
     deleteBtn.style.visibility = "hidden";
     deleteBtn.addEventListener("click", function(e) {
         var parent = checkbox.parentElement,
+            root = parent.parentElement,
             taskDivs = parent.parentElement.childNodes,
             length = taskDivs.length,
-            index = [].slice.call(taskDivs).indexOf(parent);
+            index = [].slice.call(taskDivs).indexOf(parent),
+            spanCounter,
+            footer,
+            e;
 
-        if (index === 0 && length > 0) {
+        if (index === 0 && length > 1) {
             taskDivs[1].childNodes[0].className = "first-task";
         }
+        if (!checkbox.checked) {
+            spanCounter = document.querySelector(".items-left-counter");
+            e = new Event("counter-changed")
+            self.leftTaskCounter--;
+            spanCounter.dispatchEvent(e);
+        }
         self.tasks.splice(index, 1);
-        parent.parentElement.removeChild(parent);
+        root.removeChild(parent);
+        if (self.tasks.length === 0) {
+            footer = document.querySelector(".list-footer");
+            footer.style.visibility = "hidden";
+        }
     });
 
     taskRow.addEventListener("mouseenter", function(e) {
@@ -110,34 +142,13 @@ Todo.prototype.addTask = function(task) {
     taskRow.appendChild(label);
     taskRow.appendChild(checkbox);
     taskRow.appendChild(deleteBtn);
-    taskList.appendChild(taskRow, taskList.firstChild);
+    taskRoot.appendChild(taskRow, taskRoot.firstChild);
 };
 
 Todo.prototype.loadTasks = function() {  
     this.tasks.forEach(function(cur) {
         this.addTask(cur);
     }.bind(this));  
-};
-
-Todo.prototype.addFooter = function() {
-    var taskList = document.querySelector(".task-list"),
-        footer = document.createElement("div"),
-        span = document.createElement("span"),
-        self = this;
-
-    span.addEventListener("counter-changed", function() {
-       var itemStr = " items left";
-
-       if (self.leftTaskCounter === 1) {
-           itemStr = " item left";
-       }
-       this.textContent = self.leftTaskCounter + itemStr;
-    }, false);
-    span.className = "items-left-counter";
-    span.textContent = this.leftTaskCounter + " items left";
-    footer.className = "list-footer";
-    footer.appendChild(span);
-    taskList.appendChild(footer);   
 };
 
 Todo.prototype.updateTaskCounter = function() {
