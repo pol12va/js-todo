@@ -14,17 +14,17 @@ function TodoView() {
     span.addEventListener("counter-changed", function() {
        var itemStr = " items left";
 
-       if (self.model.leftTaskCounter() === 1) {
+       if (self.model.undoneTaskCounter() === 1) {
            itemStr = " item left";
        }
-       this.textContent = self.model.leftTaskCounter() + itemStr;
+       this.textContent = self.model.undoneTaskCounter() + itemStr;
     }, false);
 
     if (this.model.taskCounter() !== 0) {
         this.model.tasks().forEach(function(cur) {
             self.addTask(cur, taskList);
             if (!cur.isCompleted) {
-                self.model.incCounter();
+                self.model.increaseUndoneCounter();
             }
         });
         footer.style.visibility = "visible";
@@ -36,7 +36,7 @@ function TodoView() {
             var task = new Task(this.value, false);
             
             self.addTask(task, taskList);
-            self.model.incCounter();
+            self.model.increaseUndoneCounter();
             if (self.model.taskCounter() === 0) {
                 footer.style.visibility = "visible";
             }
@@ -77,12 +77,12 @@ TodoView.prototype.addTask = function(task, taskRoot) {
             checkbox.previousSibling.style.textDecoration = "line-through";
             checkbox.parentElement.style.opacity = "0.5";
             self.model.tasks()[index].isCompleted = true;
-            self.model.decCounter();
+            self.model.decreaseUndoneCounter();
         } else {
             checkbox.previousSibling.style.textDecoration = "";
             checkbox.parentElement.style.opacity = "1";
             self.model.tasks()[index].isCompleted = false;
-            self.model.incCounter();
+            self.model.increaseUndoneCounter();
         }
         spanCounter.dispatchEvent(e);
     });
@@ -118,7 +118,7 @@ TodoView.prototype.addTask = function(task, taskRoot) {
         if (!checkbox.checked) {
             spanCounter = document.querySelector(".items-left-counter");
             e = new Event("counter-changed")
-            self.model.decCounter();
+            self.model.decreaseUndoneCounter();
             spanCounter.dispatchEvent(e);
         }
         self.model.removeTask(index);
@@ -142,34 +142,18 @@ TodoView.prototype.addTask = function(task, taskRoot) {
     taskRoot.appendChild(taskRow, taskRoot.firstChild);
 };
 
-TodoView.prototype.loadTasks = function() {  
-    this.model.tasks().forEach(function(cur) {
-        this.addTask(cur);
-    }.bind(this));  
-};
-
-TodoView.prototype.updateTaskCounter = function() {
-    var span = document.querySelector(".items-left-counter"),
-        itemStr = " items left";
-
-    if (this.model.leftTaskCounter() === 1) {
-        itemStr = " item left";
-    }
-    span.textContent = this.model.leftTaskCounter() + itemStr; 
-};
-
 function TodoModel() {
     var tasksJson = localStorage.getItem("tasks"),
         tasks = (tasksJson !== null && tasksJson !== []) ? JSON.parse(tasksJson) : [],
         leftTaskCounter = 0;
 
     return {
-        decCounter: function() {
+        decreaseUndoneCounter: function() {
             if (leftTaskCounter > 0) {
                 leftTaskCounter--;
             }
         },
-        incCounter: function() {
+        increaseUndoneCounter: function() {
             leftTaskCounter++;
         },
         addTask: function(newTask) {
@@ -178,7 +162,7 @@ function TodoModel() {
         removeTask: function(pos) {
             tasks.splice(pos, 1);
         },
-        leftTaskCounter: function() {
+        undoneTaskCounter: function() {
             return leftTaskCounter;
         },
         taskCounter: function() {
@@ -189,18 +173,6 @@ function TodoModel() {
         }
     };
 }
-
-TodoModel.prototype.loadTasks = function() {
-    var tasksJson = localStorage.getItem("tasks");
-
-    this.tasks = (tasksJson !== null && tasksJson !== []) ? JSON.parse(tasksJson) : [];
-};
-
-TodoModel.prototype.decCounter = function() {
-    if (this.leftTaskCounter > 0) {
-        this.leftTaskCounter--;
-    }
-};
 
 function Task(text, isCompleted) {
     if (!(this instanceof Task)) {
