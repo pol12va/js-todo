@@ -1,50 +1,47 @@
-function Todo() {
-    if (!(this instanceof Todo)) {
-        return new Todo();
+function TodoView() {
+    if (!(this instanceof TodoView)) {
+        return new TodoView();
     }
     var self = this,
-        tasksJson = localStorage.getItem("tasks"),
         inputText = document.querySelector(".new-note"),
         toggleAll = document.querySelector(".toggle-all"),
         taskList = document.querySelector(".task-list"),
         footer = document.querySelector(".list-footer"),
         span = document.querySelector(".items-left-counter");
 
-    this.tasks = (tasksJson !== null && tasksJson !== []) ? JSON.parse(tasksJson) : [];
-    this.leftTaskCounter = 0;
+    this.model = new TodoModel();
 
     span.addEventListener("counter-changed", function() {
        var itemStr = " items left";
 
-       if (self.leftTaskCounter === 1) {
+       if (self.model.leftTaskCounter() === 1) {
            itemStr = " item left";
        }
-       this.textContent = self.leftTaskCounter + itemStr;
+       this.textContent = self.model.leftTaskCounter() + itemStr;
     }, false);
 
-    if (this.tasks.length !== 0) {
-        this.tasks.forEach(function(cur) {
+    if (this.model.taskCounter() !== 0) {
+        this.model.tasks().forEach(function(cur) {
             self.addTask(cur, taskList);
             if (!cur.isCompleted) {
-                self.leftTaskCounter++;
+                self.model.incCounter();
             }
         });
         footer.style.visibility = "visible";
     }
-    span.textContent = this.leftTaskCounter + " items left";
+    span.dispatchEvent(new Event("counter-changed"));
     
     inputText.addEventListener("keydown", function(e) {
         if (e.keyCode === 13) {
-            var task = new Task(this.value, false),
-                e = new Event("counter-changed");
+            var task = new Task(this.value, false);
             
             self.addTask(task, taskList);
-            self.leftTaskCounter++;
-            if (self.tasks.length === 0) {
+            self.model.incCounter();
+            if (self.model.taskCounter() === 0) {
                 footer.style.visibility = "visible";
             }
-            self.tasks.push(task);
-            span.dispatchEvent(e);
+            self.model.addTask(task);
+            span.dispatchEvent(new Event("counter-changed"));
             this.value = "";
         }
     });
@@ -60,7 +57,7 @@ function Todo() {
     });
 }
 
-Todo.prototype.addTask = function(task, taskRoot) {
+TodoView.prototype.addTask = function(task, taskRoot) {
     var checkbox = document.createElement("input"),
         taskRow = document.createElement("div"),
         label = document.createElement("label"),
@@ -79,13 +76,13 @@ Todo.prototype.addTask = function(task, taskRoot) {
         if (checkbox.checked) {
             checkbox.previousSibling.style.textDecoration = "line-through";
             checkbox.parentElement.style.opacity = "0.5";
-            self.tasks[index].isCompleted = true;
-            self.leftTaskCounter--;
+            self.model.tasks()[index].isCompleted = true;
+            self.model.decCounter();
         } else {
             checkbox.previousSibling.style.textDecoration = "";
             checkbox.parentElement.style.opacity = "1";
-            self.tasks[index].isCompleted = false;
-            self.leftTaskCounter++;
+            self.model.tasks()[index].isCompleted = false;
+            self.model.incCounter();
         }
         spanCounter.dispatchEvent(e);
     });
@@ -121,12 +118,12 @@ Todo.prototype.addTask = function(task, taskRoot) {
         if (!checkbox.checked) {
             spanCounter = document.querySelector(".items-left-counter");
             e = new Event("counter-changed")
-            self.leftTaskCounter--;
+            self.model.decCounter();
             spanCounter.dispatchEvent(e);
         }
-        self.tasks.splice(index, 1);
+        self.model.removeTask(index);
         root.removeChild(parent);
-        if (self.tasks.length === 0) {
+        if (self.model.taskCounter() === 0) {
             footer = document.querySelector(".list-footer");
             footer.style.visibility = "hidden";
         }
@@ -145,20 +142,64 @@ Todo.prototype.addTask = function(task, taskRoot) {
     taskRoot.appendChild(taskRow, taskRoot.firstChild);
 };
 
-Todo.prototype.loadTasks = function() {  
-    this.tasks.forEach(function(cur) {
+TodoView.prototype.loadTasks = function() {  
+    this.model.tasks().forEach(function(cur) {
         this.addTask(cur);
     }.bind(this));  
 };
 
-Todo.prototype.updateTaskCounter = function() {
+TodoView.prototype.updateTaskCounter = function() {
     var span = document.querySelector(".items-left-counter"),
         itemStr = " items left";
 
-    if (this.leftTaskCounter === 1) {
+    if (this.model.leftTaskCounter() === 1) {
         itemStr = " item left";
     }
-    span.textContent = this.leftTaskCounter + itemStr; 
+    span.textContent = this.model.leftTaskCounter() + itemStr; 
+};
+
+function TodoModel() {
+    var tasksJson = localStorage.getItem("tasks"),
+        tasks = (tasksJson !== null && tasksJson !== []) ? JSON.parse(tasksJson) : [],
+        leftTaskCounter = 0;
+
+    return {
+        decCounter: function() {
+            if (leftTaskCounter > 0) {
+                leftTaskCounter--;
+            }
+        },
+        incCounter: function() {
+            leftTaskCounter++;
+        },
+        addTask: function(newTask) {
+            tasks.push(newTask);
+        },
+        removeTask: function(pos) {
+            tasks.splice(pos, 1);
+        },
+        leftTaskCounter: function() {
+            return leftTaskCounter;
+        },
+        taskCounter: function() {
+            return tasks.length;
+        },
+        tasks: function() {
+            return tasks;
+        }
+    };
+}
+
+TodoModel.prototype.loadTasks = function() {
+    var tasksJson = localStorage.getItem("tasks");
+
+    this.tasks = (tasksJson !== null && tasksJson !== []) ? JSON.parse(tasksJson) : [];
+};
+
+TodoModel.prototype.decCounter = function() {
+    if (this.leftTaskCounter > 0) {
+        this.leftTaskCounter--;
+    }
 };
 
 function Task(text, isCompleted) {
@@ -171,8 +212,8 @@ function Task(text, isCompleted) {
 
 (function() {
     //localStorage.removeItem("tasks");
-    var todo = new Todo();
+    var todoView = new TodoView();
     window.addEventListener("beforeunload", function() {
-        localStorage.setItem("tasks", JSON.stringify(todo.tasks));
+        localStorage.setItem("tasks", JSON.stringify(todoView.model.tasks()));
     });
 }());
