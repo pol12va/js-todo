@@ -101,6 +101,14 @@ body {
     margin-right: 5px;
 }
 
+.link:visited {
+    color: #0000EE;
+}
+
 .clear-completed-link {
     margin-left: 50px;
+}
+
+.clear-completed-link:visited {
+    color: #0000EE;
 }

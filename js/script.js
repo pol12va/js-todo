@@ -2,6 +2,8 @@ function TodoView() {
     if (!(this instanceof TodoView)) {
         return new TodoView();
     }
+
+    this.model = new TodoModel();
     var self = this,
         inputText = document.querySelector(".new-note"),
         toggleAll = document.querySelector(".toggle-all"),
@@ -9,12 +11,19 @@ function TodoView() {
         taskListChildren = taskList.childNodes,
         footer = document.querySelector(".list-footer"),
         span = document.querySelector(".items-left-counter"),
+        links = document.querySelectorAll(".link"),
         allLink = document.querySelector(".all-tasks"),
         activeLink = document.querySelector(".active-tasks"),
         completedLink = document.querySelector(".completed-tasks"),
-        clearCompletedLink = document.querySelector(".clear-completed-link");
+        clearCompletedLink = document.querySelector(".clear-completed-link"),
+        changeLinkColors;
 
-    this.model = new TodoModel();
+    changeLinkColors = function() {
+        for (j = 0; j < links.length; j++) {
+            links[j].style.color = "#0000EE";
+        }
+        this.style.color = "red";
+    };
 
     span.addEventListener("counter-changed", function() {
        var itemStr = " items left";
@@ -35,7 +44,7 @@ function TodoView() {
         footer.style.visibility = "visible";
     }
     span.dispatchEvent(new Event("counter-changed"));
-    
+
     inputText.addEventListener("keydown", function(e) {
         if (e.keyCode === 13) {
             var task = new Task(this.value, false);
@@ -62,11 +71,12 @@ function TodoView() {
     });
 
     allLink.addEventListener("click", function(e) {
-        var i;
+        var i, j;
 
         for (i = 0; i < taskListChildren.length; i++) {
             taskListChildren[i].style.display = "inline";
         }
+        changeLinkColors.call(this);
         e.preventDefault();
     });
 
@@ -80,6 +90,7 @@ function TodoView() {
                 taskListChildren[i].style.display = "none";
             }
         }
+        changeLinkColors.call(this);
         e.preventDefault();
     });
 
@@ -93,6 +104,7 @@ function TodoView() {
                 taskListChildren[i].style.display = "none";
             }
         }
+        changeLinkColors.call(this);
         e.preventDefault();
     });
 
@@ -236,5 +248,6 @@ function Task(text, isCompleted) {
     var todoView = new TodoView();
     window.addEventListener("beforeunload", function() {
         localStorage.setItem("tasks", JSON.stringify(todoView.model.tasks()));
+        localStorage.setItem("filterId", todoView.model.getFilterId());
     });
 }());
