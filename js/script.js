@@ -16,7 +16,8 @@ function TodoView() {
         activeLink = document.querySelector(".active-tasks"),
         completedLink = document.querySelector(".completed-tasks"),
         clearCompletedLink = document.querySelector(".clear-completed-link"),
-        changeLinkColors;
+        changeLinkColors,
+        createNewClickEvent;
 
     changeLinkColors = function() {
         for (j = 0; j < links.length; j++) {
@@ -24,6 +25,13 @@ function TodoView() {
         }
         this.style.color = "red";
     };
+
+    createNewClickEvent = function() {
+        var evnt = document.createEvent("MouseEvents");
+
+        evnt.initEvent("click", true, true);
+        return evnt;
+    }
 
     span.addEventListener("counter-changed", function() {
        var itemStr = " items left";
@@ -77,6 +85,7 @@ function TodoView() {
             taskListChildren[i].style.display = "inline";
         }
         changeLinkColors.call(this);
+        self.model.setFilterId("0");
         e.preventDefault();
     });
 
@@ -91,6 +100,7 @@ function TodoView() {
             }
         }
         changeLinkColors.call(this);
+        self.model.setFilterId("1");
         e.preventDefault();
     });
 
@@ -105,6 +115,7 @@ function TodoView() {
             }
         }
         changeLinkColors.call(this);
+        self.model.setFilterId("2");
         e.preventDefault();
     });
 
@@ -122,6 +133,20 @@ function TodoView() {
         }
         e.preventDefault();
     });
+
+    switch (this.model.getFilterId()) {
+        case "0":
+            allLink.dispatchEvent(createNewClickEvent());
+            break;
+        case "1":
+            activeLink.dispatchEvent(createNewClickEvent());
+            break;
+        case "2":
+            completedLink.dispatchEvent(createNewClickEvent());
+            break;
+        default:
+            allLink.dispatchEvent(evnt);
+    }
 }
 
 TodoView.prototype.addTask = function(task, taskRoot) {
@@ -206,6 +231,7 @@ TodoView.prototype.addTask = function(task, taskRoot) {
 function TodoModel() {
     var tasksJson = localStorage.getItem("tasks"),
         tasks = (tasksJson !== null && tasksJson !== []) ? JSON.parse(tasksJson) : [],
+        filterId = localStorage.getItem("filterId") || "0",
         leftTaskCounter = 0;
 
     return {
@@ -231,6 +257,12 @@ function TodoModel() {
         },
         tasks: function() {
             return tasks.slice();
+        },
+        getFilterId: function() {
+            return filterId;
+        },
+        setFilterId: function(value) {
+            filterId = value;
         }
     };
 }
