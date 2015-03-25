@@ -61,7 +61,7 @@ function TodoView() {
     });
 
     allLink.addEventListener("click", function(e) {
-        var allTaskViews = document.querySelector(".task-list").childNodes,
+        var allTaskViews = taskList.childNodes,
             i;
 
         for (i = 0; i < allTaskViews.length; i++) {
@@ -71,7 +71,7 @@ function TodoView() {
     });
 
     activeLink.addEventListener("click", function(e) {
-        var allTaskViews = document.querySelector(".task-list").childNodes,
+        var allTaskViews = taskList.childNodes,
             i;
 
         for (i = 0; i < allTaskViews.length; i++) {
@@ -85,7 +85,7 @@ function TodoView() {
     });
 
     completedLink.addEventListener("click", function(e) {
-        var allTaskViews = document.querySelector(".task-list").childNodes,
+        var allTaskViews = taskList.childNodes,
             i;
 
         for (i = 0; i < allTaskViews.length; i++) {
@@ -99,8 +99,7 @@ function TodoView() {
     });
 
     clearCompletedLink.addEventListener("click", function(e) {
-        var wrap, footer
-            root = document.querySelector(".task-list"),
+        var root = taskList,
             allTaskViews = root.childNodes,
             i = allTaskViews.length;
 
@@ -111,7 +110,6 @@ function TodoView() {
             }
         }
         if (self.model.taskCounter() === 0) {
-            wrap = root.parentElement;
             footer.style.visibility = "hidden";
         }
         e.preventDefault();
