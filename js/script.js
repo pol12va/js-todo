@@ -6,6 +6,7 @@ function TodoView() {
         inputText = document.querySelector(".new-note"),
         toggleAll = document.querySelector(".toggle-all"),
         taskList = document.querySelector(".task-list"),
+        taskListChildren = taskList.childNodes,
         footer = document.querySelector(".list-footer"),
         span = document.querySelector(".items-left-counter"),
         allLink = document.querySelector(".all-tasks"),
@@ -61,52 +62,47 @@ function TodoView() {
     });
 
     allLink.addEventListener("click", function(e) {
-        var allTaskViews = taskList.childNodes,
-            i;
+        var i;
 
-        for (i = 0; i < allTaskViews.length; i++) {
-            allTaskViews[i].style.display = "inline";
+        for (i = 0; i < taskListChildren.length; i++) {
+            taskListChildren[i].style.display = "inline";
         }
         e.preventDefault();
     });
 
     activeLink.addEventListener("click", function(e) {
-        var allTaskViews = taskList.childNodes,
-            i;
+        var i;
 
-        for (i = 0; i < allTaskViews.length; i++) {
+        for (i = 0; i < taskListChildren.length; i++) {
             if (!self.model.tasks()[i].isCompleted) {
-                allTaskViews[i].style.display = "inline";
+                taskListChildren[i].style.display = "inline";
             } else {
-                allTaskViews[i].style.display = "none";
+                taskListChildren[i].style.display = "none";
             }
         }
         e.preventDefault();
     });
 
     completedLink.addEventListener("click", function(e) {
-        var allTaskViews = taskList.childNodes,
-            i;
+        var i;
 
-        for (i = 0; i < allTaskViews.length; i++) {
+        for (i = 0; i < taskListChildren.length; i++) {
             if (self.model.tasks()[i].isCompleted) {
-                allTaskViews[i].style.display = "inline";
+                taskListChildren[i].style.display = "inline";
             } else {
-                allTaskViews[i].style.display = "none";
+                taskListChildren[i].style.display = "none";
             }
         }
         e.preventDefault();
     });
 
     clearCompletedLink.addEventListener("click", function(e) {
-        var root = taskList,
-            allTaskViews = root.childNodes,
-            i = allTaskViews.length;
+        var i = taskListChildren.length;
 
         while (i--) {
             if (self.model.tasks()[i].isCompleted) {
                 self.model.removeTask(i);
-                root.removeChild(allTaskViews[i]);
+                taskList.removeChild(taskListChildren[i]);
             }
         }
         if (self.model.taskCounter() === 0) {
@@ -145,7 +141,7 @@ TodoView.prototype.addTask = function(task, taskRoot) {
         spanCounter.dispatchEvent(new Event("counter-changed"));
     });
 
-    taskRoot.firstChild ? label.className = "task" : label.className = "first-task";
+    label.className = "task";
     label.textContent = task.text;
     if (task.isCompleted) {  
         taskRow.style.opacity = "0.5";
@@ -169,9 +165,6 @@ TodoView.prototype.addTask = function(task, taskRoot) {
             spanCounter,
             footer;
 
-        if (index === 0 && length > 1) {
-            taskDivs[1].childNodes[0].className = "first-task";
-        }
         if (!checkbox.checked) {
             spanCounter = document.querySelector(".items-left-counter");
             self.model.decreaseUndoneCounter();
