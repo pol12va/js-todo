@@ -7,7 +7,11 @@ function TodoView() {
         toggleAll = document.querySelector(".toggle-all"),
         taskList = document.querySelector(".task-list"),
         footer = document.querySelector(".list-footer"),
-        span = document.querySelector(".items-left-counter");
+        span = document.querySelector(".items-left-counter"),
+        allLink = document.querySelector(".all-tasks"),
+        activeLink = document.querySelector(".active-tasks"),
+        completedLink = document.querySelector(".completed-tasks"),
+        clearCompletedLink = document.querySelector(".clear-completed-link");
 
     this.model = new TodoModel();
 
@@ -55,6 +59,63 @@ function TodoView() {
             allCheckboxes[i].dispatchEvent(new Event('change'));
         }
     });
+
+    allLink.addEventListener("click", function(e) {
+        var allTaskViews = document.querySelector(".task-list").childNodes,
+            i;
+
+        for (i = 0; i < allTaskViews.length; i++) {
+            allTaskViews[i].style.display = "inline";
+        }
+        e.preventDefault();
+    });
+
+    activeLink.addEventListener("click", function(e) {
+        var allTaskViews = document.querySelector(".task-list").childNodes,
+            i;
+
+        for (i = 0; i < allTaskViews.length; i++) {
+            if (!self.model.tasks()[i].isCompleted) {
+                allTaskViews[i].style.display = "inline";
+            } else {
+                allTaskViews[i].style.display = "none";
+            }
+        }
+        e.preventDefault();
+    });
+
+    completedLink.addEventListener("click", function(e) {
+        var allTaskViews = document.querySelector(".task-list").childNodes,
+            i;
+
+        for (i = 0; i < allTaskViews.length; i++) {
+            if (self.model.tasks()[i].isCompleted) {
+                allTaskViews[i].style.display = "inline";
+            } else {
+                allTaskViews[i].style.display = "none";
+            }
+        }
+        e.preventDefault();
+    });
+
+    clearCompletedLink.addEventListener("click", function(e) {
+        var wrap, footer
+            root = document.querySelector(".task-list"),
+            allTaskViews = root.childNodes,
+            i = allTaskViews.length;
+
+        while (i--) {
+            if (self.model.tasks()[i].isCompleted) {
+                self.model.removeTask(i);
+                root.removeChild(allTaskViews[i]);
+            }
+        }
+        if (self.model.taskCounter() === 0) {
+            wrap = root.parentElement;
+            footer.style.visibility = "hidden";
+        }
+        e.preventDefault();
+    });
 }
 
 TodoView.prototype.addTask = function(task, taskRoot) {
@@ -69,8 +130,7 @@ TodoView.prototype.addTask = function(task, taskRoot) {
     checkbox.addEventListener("change", function(e) {
         var parent = checkbox.parentElement,
             taskDivs = parent.parentElement.childNodes,
-            index = [].slice.call(taskDivs).indexOf(parent),
-            e = new Event("counter-changed"),
+            index = [].slice.call(taskDivs).indexOf(parent)
             spanCounter = document.querySelector(".items-left-counter");
 
         if (checkbox.checked) {
@@ -84,7 +144,7 @@ TodoView.prototype.addTask = function(task, taskRoot) {
             self.model.tasks()[index].isCompleted = false;
             self.model.increaseUndoneCounter();
         }
-        spanCounter.dispatchEvent(e);
+        spanCounter.dispatchEvent(new Event("counter-changed"));
     });
 
     taskRoot.firstChild ? label.className = "task" : label.className = "first-task";
@@ -109,17 +169,15 @@ TodoView.prototype.addTask = function(task, taskRoot) {
             length = taskDivs.length,
             index = [].slice.call(taskDivs).indexOf(parent),
             spanCounter,
-            footer,
-            e;
+            footer;
 
         if (index === 0 && length > 1) {
             taskDivs[1].childNodes[0].className = "first-task";
         }
         if (!checkbox.checked) {
             spanCounter = document.querySelector(".items-left-counter");
-            e = new Event("counter-changed")
             self.model.decreaseUndoneCounter();
-            spanCounter.dispatchEvent(e);
+            spanCounter.dispatchEvent(new Event("counter-changed"));
         }
         self.model.removeTask(index);
         root.removeChild(parent);
@@ -169,7 +227,7 @@ function TodoModel() {
             return tasks.length;
         },
         tasks: function() {
-            return tasks;
+            return tasks.slice();
         }
     };
 }
