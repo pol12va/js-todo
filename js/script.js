@@ -27,10 +27,13 @@ function TodoView() {
     };
 
     createNewClickEvent = function() {
-        var evnt = document.createEvent("MouseEvents");
+        var evt = new MouseEvent("click", {
+            bubbles: true,
+            cancelable: true,
+            view: window
+        });
 
-        evnt.initEvent("click", true, true);
-        return evnt;
+        return evt;
     }
 
     span.addEventListener("counter-changed", function() {
