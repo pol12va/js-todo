@@ -20,8 +20,10 @@ function TodoView() {
         createNewClickEvent;
 
     changeLinkColors = function() {
-        for (j = 0; j < links.length; j++) {
-            links[j].style.color = "#0000EE";
+        var i;
+
+        for (i = 0; i < links.length; i++) {
+            links[i].style.color = "#0000EE";
         }
         this.style.color = "red";
     };
@@ -152,84 +154,84 @@ function TodoView() {
     }
 }
 
-TodoView.prototype.addTask = function(task, taskRoot) {
-    var checkbox = document.createElement("input"),
-        taskRow = document.createElement("div"),
-        label = document.createElement("label"),
-        deleteBtn = document.createElement("button"),
-        self = this;
+TodoView.prototype.addTask = (function() {
+    var spanCounter = document.querySelector(".items-left-counter"),
+        footer = document.querySelector(".list-footer");
 
-    checkbox.type = "checkbox";
-    checkbox.className = "toggle-task";
-    checkbox.addEventListener("change", function(e) {
-        var parent = checkbox.parentElement,
-            taskDivs = parent.parentElement.childNodes,
-            index = [].slice.call(taskDivs).indexOf(parent)
-            spanCounter = document.querySelector(".items-left-counter");
+    return function(task, taskRoot) {
+        var checkbox = document.createElement("input"),
+            taskRow = document.createElement("div"),
+            label = document.createElement("label"),
+            deleteBtn = document.createElement("button"),
+            self = this;
 
-        if (checkbox.checked) {
-            checkbox.previousSibling.style.textDecoration = "line-through";
-            checkbox.parentElement.style.opacity = "0.5";
-            self.model.tasks()[index].isCompleted = true;
-            self.model.decreaseUndoneCounter();
-        } else {
-            checkbox.previousSibling.style.textDecoration = "";
-            checkbox.parentElement.style.opacity = "1";
-            self.model.tasks()[index].isCompleted = false;
-            self.model.increaseUndoneCounter();
-        }
-        spanCounter.dispatchEvent(new Event("counter-changed"));
-    });
+        checkbox.type = "checkbox";
+        checkbox.className = "toggle-task";
+        checkbox.addEventListener("change", function(e) {
+            var parent = checkbox.parentElement,
+                taskDivs = parent.parentElement.childNodes,
+                index = [].slice.call(taskDivs).indexOf(parent);
 
-    label.className = "task";
-    label.textContent = task.text;
-    if (task.isCompleted) {  
-        taskRow.style.opacity = "0.5";
-        label.style.textDecoration = "line-through";
-        checkbox.checked = true;
-    } else {
-        taskRow.style.opacity = "1";
-        label.style.textDecoration = "";
-        checkbox.checked = false;
-    }
-
-    deleteBtn.className = "delete";
-    deleteBtn.textContent = "X";
-    deleteBtn.style.visibility = "hidden";
-    deleteBtn.addEventListener("click", function(e) {
-        var parent = checkbox.parentElement,
-            root = parent.parentElement,
-            taskDivs = parent.parentElement.childNodes,
-            length = taskDivs.length,
-            index = [].slice.call(taskDivs).indexOf(parent),
-            spanCounter,
-            footer;
-
-        if (!checkbox.checked) {
-            spanCounter = document.querySelector(".items-left-counter");
-            self.model.decreaseUndoneCounter();
+            if (checkbox.checked) {
+                checkbox.previousSibling.style.textDecoration = "line-through";
+                checkbox.parentElement.style.opacity = "0.5";
+                self.model.tasks()[index].isCompleted = true;
+                self.model.decreaseUndoneCounter();
+            } else {
+                checkbox.previousSibling.style.textDecoration = "";
+                checkbox.parentElement.style.opacity = "1";
+                self.model.tasks()[index].isCompleted = false;
+                self.model.increaseUndoneCounter();
+            }
             spanCounter.dispatchEvent(new Event("counter-changed"));
-        }
-        self.model.removeTask(index);
-        root.removeChild(parent);
-        if (self.model.taskCounter() === 0) {
-            footer = document.querySelector(".list-footer");
-            footer.style.visibility = "hidden";
-        }
-    });
+        });
 
-    taskRow.addEventListener("mouseenter", function(e) {
-        this.lastChild.style.visibility = "visible";
-    });
-    taskRow.addEventListener("mouseleave", function(e) {
-        this.lastChild.style.visibility = "hidden";
-    });
+        label.className = "task";
+        label.textContent = task.text;
+        if (task.isCompleted) {  
+            taskRow.style.opacity = "0.5";
+            label.style.textDecoration = "line-through";
+            checkbox.checked = true;
+        } else {
+            taskRow.style.opacity = "1";
+            label.style.textDecoration = "";
+            checkbox.checked = false;
+        }
 
-    taskRow.appendChild(label);
-    taskRow.appendChild(checkbox);
-    taskRow.appendChild(deleteBtn);
-    taskRoot.appendChild(taskRow, taskRoot.firstChild);
-};
+        deleteBtn.className = "delete";
+        deleteBtn.textContent = "X";
+        deleteBtn.style.visibility = "hidden";
+        deleteBtn.addEventListener("click", function(e) {
+            var parent = deleteBtn.parentElement,
+                root = parent.parentElement,
+                taskDivs = parent.parentElement.childNodes,
+                length = taskDivs.length,
+                index = [].slice.call(taskDivs).indexOf(parent);
+
+            if (!checkbox.checked) {
+                self.model.decreaseUndoneCounter();
+                spanCounter.dispatchEvent(new Event("counter-changed"));
+            }
+            self.model.removeTask(index);
+            root.removeChild(parent);
+            if (self.model.taskCounter() === 0) {
+                footer.style.visibility = "hidden";
+            }
+        });
+
+        taskRow.addEventListener("mouseenter", function(e) {
+            this.lastChild.style.visibility = "visible";
+        });
+        taskRow.addEventListener("mouseleave", function(e) {
+            this.lastChild.style.visibility = "hidden";
+        });
+
+        taskRow.appendChild(label);
+        taskRow.appendChild(checkbox);
+        taskRow.appendChild(deleteBtn);
+        taskRoot.appendChild(taskRow, taskRoot.firstChild);
+    }    
+}());
 
 function TodoModel() {
     var tasksJson = localStorage.getItem("tasks"),
