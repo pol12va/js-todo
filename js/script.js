@@ -45,7 +45,7 @@ function TodoView() {
            itemStr = " item left";
        }
        this.textContent = self.model.undoneTaskCounter() + itemStr;
-    }, false);
+    });
 
     if (this.model.taskCounter() !== 0) {
         this.model.tasks().forEach(function(cur) {
@@ -84,9 +84,10 @@ function TodoView() {
     });
 
     allLink.addEventListener("click", function(e) {
-        var i, j;
+        var i;
 
-        if (self.model.getFilterId() !== "0") {
+        if (self.model.getFilterId() !== "0"
+            || document.readyState !== "complete") {
             for (i = 0; i < taskListChildren.length; i++) {
                 taskListChildren[i].style.display = "inline";
             }
@@ -99,7 +100,8 @@ function TodoView() {
     activeLink.addEventListener("click", function(e) {
         var i;
 
-        if (self.model.getFilterId() !== "1") {
+        if (self.model.getFilterId() !== "1"
+            || document.readyState !== "complete") {
             for (i = 0; i < taskListChildren.length; i++) {
                 if (!self.model.tasks()[i].isCompleted) {
                     taskListChildren[i].style.display = "inline";
@@ -116,7 +118,8 @@ function TodoView() {
     completedLink.addEventListener("click", function(e) {
         var i;
 
-        if (self.model.getFilterId() !== "2") {
+        if (self.model.getFilterId() !== "2"
+            || document.readyState !== "complete") {
             for (i = 0; i < taskListChildren.length; i++) {
                 if (self.model.tasks()[i].isCompleted) {
                     taskListChildren[i].style.display = "inline";
@@ -148,19 +151,15 @@ function TodoView() {
     switch (this.model.getFilterId()) {
         case "0":
             allLink.dispatchEvent(createNewClickEvent());
-            changeLinkColors.call(allLink);
             break;
         case "1":
             activeLink.dispatchEvent(createNewClickEvent());
-            changeLinkColors.call(activeLink);
             break;
         case "2":
             completedLink.dispatchEvent(createNewClickEvent());
-            changeLinkColors.call(completedLink);
             break;
         default:
             allLink.dispatchEvent(evnt);
-            changeLinkColors.call(allLink);
     }
 }
 
@@ -240,8 +239,13 @@ TodoView.prototype.addTask = (function() {
         taskRow.appendChild(checkbox);
         taskRow.appendChild(deleteBtn);
         taskRoot.appendChild(taskRow, taskRoot.firstChild);
-    }    
+    }
 }());
+
+TodoView.prototype.storeData = function() {
+    localStorage.setItem("tasks", JSON.stringify(this.model.tasks()));
+    localStorage.setItem("filterId", this.model.getFilterId());
+};
 
 function TodoModel() {
     var tasksJson = localStorage.getItem("tasks"),
