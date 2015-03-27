@@ -86,41 +86,47 @@ function TodoView() {
     allLink.addEventListener("click", function(e) {
         var i, j;
 
-        for (i = 0; i < taskListChildren.length; i++) {
-            taskListChildren[i].style.display = "inline";
+        if (self.model.getFilterId() !== "0") {
+            for (i = 0; i < taskListChildren.length; i++) {
+                taskListChildren[i].style.display = "inline";
+            }
+            changeLinkColors.call(this);
+            self.model.setFilterId("0");
         }
-        changeLinkColors.call(this);
-        self.model.setFilterId("0");
         e.preventDefault();
     });
 
     activeLink.addEventListener("click", function(e) {
         var i;
 
-        for (i = 0; i < taskListChildren.length; i++) {
-            if (!self.model.tasks()[i].isCompleted) {
-                taskListChildren[i].style.display = "inline";
-            } else {
-                taskListChildren[i].style.display = "none";
+        if (self.model.getFilterId() !== "1") {
+            for (i = 0; i < taskListChildren.length; i++) {
+                if (!self.model.tasks()[i].isCompleted) {
+                    taskListChildren[i].style.display = "inline";
+                } else {
+                    taskListChildren[i].style.display = "none";
+                }
             }
+            changeLinkColors.call(this);
+            self.model.setFilterId("1");
         }
-        changeLinkColors.call(this);
-        self.model.setFilterId("1");
         e.preventDefault();
     });
 
     completedLink.addEventListener("click", function(e) {
         var i;
 
-        for (i = 0; i < taskListChildren.length; i++) {
-            if (self.model.tasks()[i].isCompleted) {
-                taskListChildren[i].style.display = "inline";
-            } else {
-                taskListChildren[i].style.display = "none";
+        if (self.model.getFilterId() !== "2") {
+            for (i = 0; i < taskListChildren.length; i++) {
+                if (self.model.tasks()[i].isCompleted) {
+                    taskListChildren[i].style.display = "inline";
+                } else {
+                    taskListChildren[i].style.display = "none";
+                }
             }
+            changeLinkColors.call(this);
+            self.model.setFilterId("2");
         }
-        changeLinkColors.call(this);
-        self.model.setFilterId("2");
         e.preventDefault();
     });
 
@@ -142,15 +148,19 @@ function TodoView() {
     switch (this.model.getFilterId()) {
         case "0":
             allLink.dispatchEvent(createNewClickEvent());
+            changeLinkColors.call(allLink);
             break;
         case "1":
             activeLink.dispatchEvent(createNewClickEvent());
+            changeLinkColors.call(activeLink);
             break;
         case "2":
             completedLink.dispatchEvent(createNewClickEvent());
+            changeLinkColors.call(completedLink);
             break;
         default:
             allLink.dispatchEvent(evnt);
+            changeLinkColors.call(allLink);
     }
 }
 
