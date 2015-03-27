@@ -298,7 +298,6 @@ function Task(text, isCompleted) {
     //localStorage.removeItem("tasks");
     var todoView = new TodoView();
     window.addEventListener("beforeunload", function() {
-        localStorage.setItem("tasks", JSON.stringify(todoView.model.tasks()));
-        localStorage.setItem("filterId", todoView.model.getFilterId());
+        todoView.storeData();
     });
 }());
