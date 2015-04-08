@@ -86,13 +86,13 @@ function TodoView() {
     allLink.addEventListener("click", function(e) {
         var i;
 
-        if (self.model.getFilterId() !== "0"
+        if (self.model.filterId !== "0"
             || document.readyState !== "complete") {
             for (i = 0; i < taskListChildren.length; i++) {
                 taskListChildren[i].style.display = "inline";
             }
             changeLinkColors.call(this);
-            self.model.setFilterId("0");
+            self.model.filterId = "0";
         }
         e.preventDefault();
     });
@@ -100,7 +100,7 @@ function TodoView() {
     activeLink.addEventListener("click", function(e) {
         var i;
 
-        if (self.model.getFilterId() !== "1"
+        if (self.model.filterId !== "1"
             || document.readyState !== "complete") {
             for (i = 0; i < taskListChildren.length; i++) {
                 if (!self.model.tasks()[i].isCompleted) {
@@ -110,7 +110,7 @@ function TodoView() {
                 }
             }
             changeLinkColors.call(this);
-            self.model.setFilterId("1");
+            self.model.filterId = "1";
         }
         e.preventDefault();
     });
@@ -118,7 +118,7 @@ function TodoView() {
     completedLink.addEventListener("click", function(e) {
         var i;
 
-        if (self.model.getFilterId() !== "2"
+        if (self.model.filterId !== "2"
             || document.readyState !== "complete") {
             for (i = 0; i < taskListChildren.length; i++) {
                 if (self.model.tasks()[i].isCompleted) {
@@ -128,7 +128,7 @@ function TodoView() {
                 }
             }
             changeLinkColors.call(this);
-            self.model.setFilterId("2");
+            self.model.filterId = "2";
         }
         e.preventDefault();
     });
@@ -148,7 +148,7 @@ function TodoView() {
         e.preventDefault();
     });
 
-    switch (this.model.getFilterId()) {
+    switch (this.model.filterId) {
         case "0":
             allLink.dispatchEvent(createNewClickEvent());
             break;
@@ -277,11 +277,12 @@ function TodoModel() {
         tasks: function() {
             return tasks.slice();
         },
-        getFilterId: function() {
+        get filterId() {
             return filterId;
         },
-        setFilterId: function(value) {
-            filterId = value;
+        set filterId(value) {
+            var number = Number(value);
+            (number >= 0 && number < 3) ? filterId = value : filterId = "0";
         }
     };
 }
