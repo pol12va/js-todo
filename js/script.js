@@ -59,9 +59,9 @@ function TodoView() {
     span.dispatchEvent(new Event("counter-changed"));
 
     inputText.addEventListener("keydown", function(e) {
-        if (e.keyCode === 13) {
-            var task = new Task(this.value, false);
-            
+        var task = new Task(this.value, false);
+        
+        if (e.keyCode === 13) {            
             self.addTask(task, taskList);
             self.model.increaseUndoneCounter();
             if (self.model.taskCounter() === 0) {
@@ -75,11 +75,13 @@ function TodoView() {
 
     toggleAll.addEventListener("change", function(e) {
         var i,
-            allCheckboxes = document.getElementsByClassName("toggle-task");
+            allCheckboxes = document.getElementsByClassName("toggle-task")
+            checkbox;
 
         for (i = 0; i < allCheckboxes.length; i++) {
-            allCheckboxes[i].checked = e.target.checked;
-            allCheckboxes[i].dispatchEvent(new Event('change'));
+            checkbox = allCheckboxes[i];
+            checkbox.checked = e.target.checked;
+            checkbox.dispatchEvent(new Event('change'));
         }
     });
 
@@ -183,7 +185,7 @@ TodoView.prototype.addTask = (function() {
 
             if (checkbox.checked) {
                 checkbox.previousSibling.style.textDecoration = "line-through";
-                checkbox.parentElement.style.opacity = "0.5";
+                parent.style.opacity = "0.5";
                 self.model.tasks()[index].isCompleted = true;
                 self.model.decreaseUndoneCounter();
             } else {
@@ -213,7 +215,7 @@ TodoView.prototype.addTask = (function() {
         deleteBtn.addEventListener("click", function(e) {
             var parent = deleteBtn.parentElement,
                 root = parent.parentElement,
-                taskDivs = parent.parentElement.childNodes,
+                taskDivs = root.childNodes,
                 length = taskDivs.length,
                 index = [].slice.call(taskDivs).indexOf(parent);
 
